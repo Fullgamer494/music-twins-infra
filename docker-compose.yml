@@ -45,12 +45,13 @@ services:
       - "${MONGO_PORT:-27017}:27017"
     volumes:
       - mongo_data:/data/db
+      - ./mongodb.key:/data/configdb/mongodb.key
       - ./init-mongodb.js:/docker-entrypoint-initdb.d/01-init.js
     networks:
       - musictwins
-    command: --replSet rs0 --bind_ip_all
+    command: --replSet rs0 --bind_ip_all --keyFile /data/configdb/mongodb.key
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand({ping:1})"]
+      test: ["CMD", "mongosh", "--quiet", "--username", "${MONGO_ADMIN_USER:-mongo}", "--password", "${MONGO_ADMIN_PASSWORD:-mongo}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand({ping:1})"]
       interval: 10s
       timeout: 5s
       retries: 5
