@@ -150,29 +150,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- ==================================================
--- ROLES (cambiar passwords en producción)
+-- ROLES: creados por init-postgres-roles.sh (lee de env vars)
+-- No poner credenciales aquí, se exponen en git.
 -- ==================================================
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'musictwins_app') THEN
-    CREATE USER musictwins_app WITH PASSWORD 'devpass123';
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'musictwins_readonly') THEN
-    CREATE USER musictwins_readonly WITH PASSWORD 'readonlypass123';
-  END IF;
-END $$;
-
--- App: lectura y escritura
-GRANT USAGE ON SCHEMA public TO musictwins_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO musictwins_app;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO musictwins_app;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO musictwins_app;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO musictwins_app;
-
--- Readonly: solo lectura (auditoría/analytics)
-GRANT USAGE ON SCHEMA public TO musictwins_readonly;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO musictwins_readonly;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO musictwins_readonly;
